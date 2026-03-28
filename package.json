@@ -1,0 +1,29 @@
+{
+  "name": "decentralised-disaster-relief-governance-and-fund-accountability-framework",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "dotenv": "^17.3.1",
+    "hardhat": "^3.2.0"
+  },
+  "dependencies": {
+    "@account-abstraction/contracts": "^0.8.0",
+    "@openzeppelin/contracts": "^5.6.1",
+    "@tanstack/react-query": "^5.95.2",
+    "axios": "^1.14.0",
+    "ethers": "^6.16.0",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.7.0",
+    "recharts": "^3.8.1",
+    "socket.io-client": "^4.8.3"
+  }
+}

@@ -1,0 +1,16 @@
+# Dependencies
+**/node_modules/
+**/dist/
+**/artifacts/
+**/cache/
+
+# Environment
+.env
+
+# Hardhat
+typechain/
+typechain-types/
+
+# Misc
+.DS_Store
+*.log
