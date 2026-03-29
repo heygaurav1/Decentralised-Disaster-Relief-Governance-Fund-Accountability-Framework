@@ -1,78 +1,101 @@
-# ReliefChain: Decentralized Disaster Relief Governance Protocol
+# ReliefChain: Decentralized Disaster Relief Protocol
 
-ReliefChain is a production-ready, cryptographically enforced disaster relief infrastructure for Eastern India (Assam & West Bengal), built on **Polygon zkEVM** with **ERC-4337 Account Abstraction**. It ensures transparency, accountability, and real-time capital flow tracking for emergency funds.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Network: Polygon zkEVM](https://img.shields.io/badge/Network-Polygon%20zkEVM-8247E5)](https://polygon.technology/polygon-zkevm)
+[![Standards: ERC-4337](https://img.shields.io/badge/Standards-ERC--4337-blue)](https://eips.ethereum.org/EIPS/eip-4337)
 
-## 🏗️ Architecture Overview
+ReliefChain is a production-ready, cryptographically enforced disaster relief infrastructure designed for high-accountability aid distribution in Eastern India (Assam & West Bengal). It leverages Polygon zkEVM for scalability, ERC-4337 for gasless user experiences, and a decentralized oracle network for geographic verification.
 
-```mermaid
-graph TD
-    User[Donor/Beneficiary] -- ERC-4337 --> Paymaster[ReliefPaymaster]
-    Paymaster -- Sponsored Tx --> EntryPoint[EntryPoint]
-    EntryPoint -- Call --> DAO[DisasterReliefDAO]
-    DAO -- Vote --> Custody[ReliefFundCustody]
-    NGO[Relief Agent] -- Upload Proof --> IPFS[Web3.Storage]
-    IPFS -- CID --> Oracle[ReliefOracle]
-    Oracle -- Verify --> Custody
-    Custody -- Release --> Beneficiary[Disaster Victim]
-```
+## 🏗️ Technical Architecture & Protocol Logic
 
-## 🚀 Getting Started (Local Development)
+ReliefChain is built on four primary pillars of accountability, ensuring that every Wei is tracked from the donor to the ground-level responder.
 
-Follow these steps to get the full stack running on your machine.
+### 1. Governance Tokenomics (`ReliefGovernanceToken.sol`)
+-   **Soul-bound**: Tokens are `non-transferable` to prevent the purchase of influence for disaster aid.
+-   **Inactivity Decay**: To ensure only active responders govern the protocol, a 10% monthly decay is applied to voting power if the last action is >180 days old.
+    -   *Equation*: `effectiveVotes = votes * (0.9 ^ (months_inactive - 6))`
+-   **Quadratic Distribution**: Voting weight is calculated as the `sqrt(tokenBalance)` to minimize whale dominance.
+
+### 2. Geographic Oracle Enforcement (`ReliefOracle.sol`)
+-   **Multi-Sig Consensus**: A 3-of-5 committee of trusted local NGOs must verify every relief request.
+-   **Geo-Fencing**: Requests are cryptographically rejected if the submitted GPS coordinates are outside the Assam/West Bengal bounding boxes:
+    -   **Assam**: `Lat: 24.3 to 28.2`, `Long: 89.8 to 96.0`
+    -   **West Bengal**: `Lat: 21.5 to 27.2`, `Long: 85.8 to 89.9`
+
+### 3. Programmable Fund Escrow (`ReliefFundCustody.sol`)
+-   **Tranche-Based Release**: Funds are never released in a single payment. They follow a 5-step lifecycle:
+    1.  `PROPOSED`: Initial request with evidence.
+    2.  `VERIFIED`: Oracle committee approval + 48h timelock start.
+    3.  `RELEASED`: 30% of funds sent to the responder.
+    4.  `IMPACT_REPORTED`: Proof-of-delivery uploaded to IPFS.
+    5.  `FINALIZED`: Remaining 70% released after second verification.
+-   **Global Safety Cap**: No single address can withdraw more than 30% of the total treasury in a 24-hour window.
+
+### 4. Gasless Operations (`ReliefPaymaster.sol`)
+-   **ERC-4337 Compatibility**: Uses a custom Account Abstraction Paymaster to sponsor transactions for "Relief Responders" whose addresses are whitelisted by the DAO.
+-   **Policy Enforcement**: The paymaster only sponsors calls to authorized functions (e.g., `uploadProof`, `requestTranche`).
+
+## 🛠️ Tech Stack & Integration
+
+*   **Smart Contracts**: Solidity ^0.8.20 (Hardhat, OpenZeppelin UI/Governor).
+*   **Decentralized Storage**: **Web3.Storage (w3up)** handles all Proof-of-Relief (PoR) evidence.
+*   **Real-time Intelligence**: **Socket.io + Redis** mirror on-chain events to the dashboard with <200ms latency.
+*   **Frontend**: Next.js 16 (App Router) + Tailwind CSS v4 + Framer Motion.
+
+## 📦 Core Smart Contracts
+
+| Contract | Purpose | Key Function |
+| :--- | :--- | :--- |
+| `ReliefGovernanceToken.sol` | Soul-bound Voting Power | `getPastVotes(account, blockNumber)` |
+| `DisasterReliefDAO.sol` | Democratic Proposal Layer | `propose(targets, values, calldatas, description)` |
+| `ReliefOracle.sol` | Geographic Trust Verification | `verifyLocation(proposalId, lat, long)` |
+| `ReliefFundCustody.sol` | Programmable Tranche Payouts | `releaseTranche(proposalId)` |
+| `ReliefPaymaster.sol` | Gasless Transaction Sponsoring | `_validatePaymasterUserOp(userOp, userOpHash)` |
+
+## 🚀 Local Deployment Guide
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [Redis](https://redis.io/) (Optional, but recommended for event caching)
-- [Hardhat](https://hardhat.org/)
+- Node.js v18+
+- [Hardhat](https://hardhat.org/) installed globally.
+- [Web3.Storage Token](https://web3.storage/) for IPFS uploads.
 
-### 1. Smart Contracts
-Deployment to Polygon zkEVM Cardona Testnet or Local Hardhat node.
+### Step 1: Initialize Environment
 ```bash
-# Install dependencies
-npm install
-
-# Compile contracts
-npx hardhat compile
-
-# Deploy to Testnet (Cardona)
-# Ensure you have set DEPLOYER_PRIVATE_KEY in .env
-npx hardhat run scripts/deploy.js --network polygonCardona
+git clone https://github.com/heygaurav1/ReliefChain.git
+cd ReliefChain
+cp .env.example .env
+# Required: DEPLOYER_PRIVATE_KEY, POLYGON_ZKEVM_RPC, WEB3_STORAGE_TOKEN
 ```
 
-### 2. Backend API
-The indexing engine and IPFS bridge.
+### Step 2: Contract Deployment
+```bash
+npm install
+npx hardhat compile
+npx hardhat run scripts/deploy.js --network cardona
+```
+
+### Step 3: Start Real-time Mirror (Backend)
 ```bash
 cd backend
 npm install
-
-# Start the server (listening on port 3001)
-node server.js
+node server.js # Starts Socket.io server on port 3001
 ```
 
-### 3. Analytics Dashboard
-The high-aesthetic, real-time control center.
+### Step 4: Launch Management Dashboard
 ```bash
 cd dashboard
 npm install
-
-# Start the dashboard (accessible at http://localhost:5173)
-npm run dev
+npm run dev # Dashboard available at localhost:3000
 ```
 
-## 🛡️ Security & Governance
+## 🔒 Security Architecture
 
-- **Quadratic Voting**: Prevents Sybil attacks by capping voting power as the square root of token weight.
-- **Relief Oracle**: M-of-N (3-of-5) committee verification for every tranche.
-- **Geographic Bounding Boxes**: Automated GPS validation for Assam (24.3N-28.2N) and West Bengal (21.5N-27.2N).
-- **48h Timelock**: All approved funds are held for a minimum of 48 hours before final release.
+*   **Timelocks**: All `ReliefFundCustody` withdrawals have a mandatory 48-hour delay after verification.
+*   **Circuit Breakers**: The DAO can pause the `ReliefFundCustody` contract instantly in case of emergency.
+*   **Decay Mechanism**: Prevents governance capture by "ghost" participants who are no longer active in relief efforts.
 
-## 🛠️ Tech Stack
-- **Blockchain**: Polygon zkEVM, Solidity, OpenZeppelin, ERC-4337.
-- **Backend**: Node.js, Express, Socket.io, Redis, Web3.Storage.
-- **Frontend**: React, Vite, Framer Motion, TailwindCSS (Vanilla CSS logic), Recharts.
-
-## 🌍 Real-Time Impact
-ReliefChain is designed to be "real" and production-ready. Every transaction is verifiable on-chain, and every delivery proof is stored permanently on IPFS.
+## 📄 License
+MIT License. Created by [heygaurav1](https://github.com/heygaurav1).
 
 ---
 *Built with ❤️ for a more accountable world.*

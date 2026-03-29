@@ -18,8 +18,8 @@ app.use(cors());
 app.use(express.json());
 
 // Contract Config (Placeholder addresses)
-const RPC_URL = process.env.POLYGON_ZKEVM_RPC;
-const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+const RPC_URL = process.env.POLYGON_ZKEVM_RPC || "https://zkevm-rpc.com";
+const provider = new ethers.JsonRpcProvider(RPC_URL);
 
 // Abi fragments (Simplified)
 const CUSTODY_ABI = [
@@ -35,18 +35,18 @@ const ORACLE_ABI = [
 async function startServer() {
     await redisClient.connect().catch(err => console.error("Redis Connection Failed:", err));
 
-    const custodyContract = new ethers.Contract(process.env.RELIEF_CUSTODY_ADDRESS || ethers.constants.AddressZero, CUSTODY_ABI, provider);
-    const oracleContract = new ethers.Contract(process.env.RELIEF_ORACLE_ADDRESS || ethers.constants.AddressZero, ORACLE_ABI, provider);
+    const custodyContract = new ethers.Contract(process.env.RELIEF_CUSTODY_ADDRESS || ethers.ZeroAddress, CUSTODY_ABI, provider);
+    const oracleContract = new ethers.Contract(process.env.RELIEF_ORACLE_ADDRESS || ethers.ZeroAddress, ORACLE_ABI, provider);
 
     // Event Listeners
     custodyContract.on("TrancheProposed", (id, amount, beneficiary) => {
-        const eventData = { type: 'TRANCHE_PROPOSED', id: id.toString(), amount: ethers.utils.formatUnits(amount, 6), beneficiary };
+        const eventData = { type: 'TRANCHE_PROPOSED', id: id.toString(), amount: ethers.formatUnits(amount, 6), beneficiary };
         io.emit('RELIEF_EVENT', eventData);
         redisClient.set(`event:${id}`, JSON.stringify(eventData));
     });
 
     custodyContract.on("FundsReleased", (id, amount, beneficiary) => {
-        const eventData = { type: 'FUNDS_RELEASED', id: id.toString(), amount: ethers.utils.formatUnits(amount, 6), beneficiary };
+        const eventData = { type: 'FUNDS_RELEASED', id: id.toString(), amount: ethers.formatUnits(amount, 6), beneficiary };
         io.emit('RELIEF_EVENT', eventData);
         redisClient.lPush('capital_flow', JSON.stringify(eventData));
     });

@@ -14,3 +14,4 @@ typechain-types/
 # Misc
 .DS_Store
 *.log
+node_modules
