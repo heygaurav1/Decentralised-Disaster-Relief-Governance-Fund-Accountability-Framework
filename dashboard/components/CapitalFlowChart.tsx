@@ -35,10 +35,10 @@ const trancheData = [
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="glass p-3 rounded-xl border border-white/10 shadow-2xl">
-        <p className="text-white font-medium mb-1">{label}</p>
+      <div className="bg-white p-3 rounded-lg border border-slate-200 shadow-xl">
+        <p className="text-slate-900 font-bold mb-1">{label}</p>
         {payload.map((entry: any, index: number) => (
-          <p key={index} className="text-xs" style={{ color: entry.color }}>
+          <p key={index} className="text-xs font-medium" style={{ color: entry.color }}>
             {entry.name}: {entry.value} ETH
           </p>
         ))}
@@ -62,43 +62,43 @@ export default function CapitalFlowChart() {
             <AreaChart data={flowData}>
               <defs>
                 <linearGradient id="colorAllocated" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--brand-primary)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="var(--brand-primary)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#1E293B" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#1E293B" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="colorReleased" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--brand-secondary)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="var(--brand-secondary)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#059669" stopOpacity={0.1} />
+                  <stop offset="95%" stopColor="#059669" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 12 }}
+                tick={{ fill: "#64748B", fontSize: 11, fontWeight: 500 }}
                 dy={10}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "rgba(255,255,255,0.3)", fontSize: 12 }}
+                tick={{ fill: "#64748B", fontSize: 11, fontWeight: 500 }}
               />
               <Tooltip content={<CustomTooltip />} />
               <Area
                 type="monotone"
                 dataKey="allocated"
-                stroke="var(--brand-primary)"
+                stroke="#1E293B"
                 fillOpacity={1}
                 fill="url(#colorAllocated)"
-                strokeWidth={2}
+                strokeWidth={2.5}
               />
               <Area
                 type="monotone"
                 dataKey="released"
-                stroke="var(--brand-secondary)"
+                stroke="#059669"
                 fillOpacity={1}
                 fill="url(#colorReleased)"
-                strokeWidth={2}
+                strokeWidth={2.5}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -118,25 +118,25 @@ export default function CapitalFlowChart() {
                 type="category"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "rgba(255,255,255,0.5)", fontSize: 11 }}
+                tick={{ fill: "#475569", fontSize: 11, fontWeight: 600 }}
                 width={80}
               />
-              <Tooltip cursor={{ fill: "rgba(255,255,255,0.05)" }} content={<CustomTooltip />} />
+              <Tooltip cursor={{ fill: "#F8FAFC" }} content={<CustomTooltip />} />
               <Bar
                 dataKey="count"
-                fill="var(--brand-primary)"
+                fill="#1E293B"
                 radius={[0, 4, 4, 0]}
                 barSize={12}
               />
             </BarChart>
           </ResponsiveContainer>
-          <div className="mt-4 pt-4 border-t border-white/5 space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-white/40">Efficiency Score</span>
-              <span className="text-secondary">8.4/10</span>
+          <div className="mt-4 pt-4 border-t border-slate-100 space-y-2">
+            <div className="flex justify-between text-xs font-bold">
+              <span className="text-slate-400 uppercase tracking-tighter">Efficiency Score</span>
+              <span className="text-emerald-600 font-black">8.4/10</span>
             </div>
-            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-secondary w-[84%]" />
+            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+              <div className="h-full bg-emerald-500 w-[84%]" />
             </div>
           </div>
         </div>

@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title ReliefGovernanceToken (RGT)
- * @notice Soul-bound governance token with inactivity decay for ReliefChain.
+ * @notice Soul-bound governance token with inactivity decay for Sahayog.
  * @dev Implements ERC20Votes for governance and custom soul-binding/decay logic.
  */
 contract ReliefGovernanceToken is ERC20, ERC20Permit, ERC20Votes, Ownable {

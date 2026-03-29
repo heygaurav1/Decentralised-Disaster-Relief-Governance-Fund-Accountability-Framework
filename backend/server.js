@@ -67,7 +67,7 @@ async function startServer() {
     });
 
     server.listen(PORT, () => {
-        console.log(`ReliefChain Backend listening on port ${PORT}`);
+        console.log(`Sahayog Backend listening on port ${PORT}`);
     });
 }
 

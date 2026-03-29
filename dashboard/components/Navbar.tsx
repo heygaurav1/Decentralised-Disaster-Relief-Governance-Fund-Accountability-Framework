@@ -4,6 +4,7 @@ import { LayoutDashboard, FileText, Shield, PieChart, Info, Settings, LogOut, Wa
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { BrandLogo } from "./BrandLogo";
 
 const navItems = [
   { id: "dashboard", label: "Overview", icon: <LayoutDashboard size={20} />, active: true },
@@ -20,12 +21,12 @@ export default function Navbar() {
     <aside className="fixed left-0 top-0 h-screen w-0 lg:w-64 bg-background border-r border-white/5 z-50 flex flex-col p-6 transition-all">
       {/* Brand */}
       <div className="flex items-center gap-3 mb-12 group pointer-events-none">
-        <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center glow-primary">
-          <Shield className="text-white w-6 h-6" />
+        <div className="w-10 h-10 rounded-xl bg-orange-50/10 flex items-center justify-center">
+          <BrandLogo className="w-8 h-8" color="#F45A2C" />
         </div>
         <div className="flex flex-col">
-          <span className="font-bold text-lg tracking-tight leading-none">ReliefChain</span>
-          <span className="text-[10px] text-white/30 uppercase tracking-widest mt-1 font-semibold">Governance Protocol</span>
+          <span className="font-bold text-lg tracking-tight leading-none text-slate-100">Sahayog</span>
+          <span className="text-[10px] text-orange-500 uppercase tracking-widest mt-1 font-semibold">Governance Protocol</span>
         </div>
       </div>
 

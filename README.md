@@ -1,101 +1,104 @@
-# ReliefChain: Decentralized Disaster Relief Protocol
+# Sahayog: Decentralized Disaster Relief Protocol & Command Center
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Network: Polygon zkEVM](https://img.shields.io/badge/Network-Polygon%20zkEVM-8247E5)](https://polygon.technology/polygon-zkevm)
 [![Standards: ERC-4337](https://img.shields.io/badge/Standards-ERC--4337-blue)](https://eips.ethereum.org/EIPS/eip-4337)
 
-ReliefChain is a production-ready, cryptographically enforced disaster relief infrastructure designed for high-accountability aid distribution in Eastern India (Assam & West Bengal). It leverages Polygon zkEVM for scalability, ERC-4337 for gasless user experiences, and a decentralized oracle network for geographic verification.
+Sahayog is a production-ready Web3 disaster relief operations center designed specifically for the **National Disaster Management Authority (NDMA)**. Targeted for high-accountability aid distribution in **Eastern India (Assam & West Bengal)**, it leverages Polygon zkEVM for scalability, ERC-4337 for gasless onboarding of government officials, and a decentralized oracle network for precise geographic verification.
 
-## 🏗️ Technical Architecture & Protocol Logic
+---
 
-ReliefChain is built on four primary pillars of accountability, ensuring that every Wei is tracked from the donor to the ground-level responder.
+## 🎯 Problem Statement
+Eastern India faces recurring hydrological disasters, triggering large-scale public and institutional funding flows. However, the lifecycle of relief capital—from Treasury allocation to beneficiary disbursement—remains opaque, fragmented, and prone to administrative inefficiencies. 
 
-### 1. Governance Tokenomics (`ReliefGovernanceToken.sol`)
--   **Soul-bound**: Tokens are `non-transferable` to prevent the purchase of influence for disaster aid.
--   **Inactivity Decay**: To ensure only active responders govern the protocol, a 10% monthly decay is applied to voting power if the last action is >180 days old.
-    -   *Equation*: `effectiveVotes = votes * (0.9 ^ (months_inactive - 6))`
--   **Quadratic Distribution**: Voting weight is calculated as the `sqrt(tokenBalance)` to minimize whale dominance.
+**Our Solution**: A decentralized governance protocol integrating programmable fund custody, milestone-based capital release, and community-verifiable proof-of-utilization. By using **Account Abstraction (ERC-4337)**, we remove all Web3 friction for non-crypto-native government users.
 
-### 2. Geographic Oracle Enforcement (`ReliefOracle.sol`)
--   **Multi-Sig Consensus**: A 3-of-5 committee of trusted local NGOs must verify every relief request.
--   **Geo-Fencing**: Requests are cryptographically rejected if the submitted GPS coordinates are outside the Assam/West Bengal bounding boxes:
-    -   **Assam**: `Lat: 24.3 to 28.2`, `Long: 89.8 to 96.0`
-    -   **West Bengal**: `Lat: 21.5 to 27.2`, `Long: 85.8 to 89.9`
+---
 
-### 3. Programmable Fund Escrow (`ReliefFundCustody.sol`)
--   **Tranche-Based Release**: Funds are never released in a single payment. They follow a 5-step lifecycle:
-    1.  `PROPOSED`: Initial request with evidence.
-    2.  `VERIFIED`: Oracle committee approval + 48h timelock start.
-    3.  `RELEASED`: 30% of funds sent to the responder.
-    4.  `IMPACT_REPORTED`: Proof-of-delivery uploaded to IPFS.
-    5.  `FINALIZED`: Remaining 70% released after second verification.
--   **Global Safety Cap**: No single address can withdraw more than 30% of the total treasury in a 24-hour window.
+## 🏗️ High-Level Design (HLD)
 
-### 4. Gasless Operations (`ReliefPaymaster.sol`)
--   **ERC-4337 Compatibility**: Uses a custom Account Abstraction Paymaster to sponsor transactions for "Relief Responders" whose addresses are whitelisted by the DAO.
--   **Policy Enforcement**: The paymaster only sponsors calls to authorized functions (e.g., `uploadProof`, `requestTranche`).
+The entire Sahayog ecosystem is divided into three major architectural planes: the **Operations Dashboard**, the **Gasless Relayer**, and the **On-Chain Governance Protocol**.
 
-## 🛠️ Tech Stack & Integration
+```mermaid
+graph TD
+    A[Gov Operations Dashboard<br/>Next.js / Tailwind CSS v4] -->|Wallet Connection| B(Ethers.js / SIWE Auth)
+    B -->|ERC-4337 UserOps| C{Bundler / Relayer Network}
+    C -->|Gasless Sponsorship| D[ReliefPaymaster.sol]
+    D --> E[DisasterReliefDAO.sol]
+    E -->|Proposal execution| F[ReliefFundCustody.sol]
+    F <-->|Geo-verification| G[ReliefOracle.sol]
+    F -->|Impact Evidence| H[(IPFS / Filecoin)]
+```
 
-*   **Smart Contracts**: Solidity ^0.8.20 (Hardhat, OpenZeppelin UI/Governor).
-*   **Decentralized Storage**: **Web3.Storage (w3up)** handles all Proof-of-Relief (PoR) evidence.
-*   **Real-time Intelligence**: **Socket.io + Redis** mirror on-chain events to the dashboard with <200ms latency.
-*   **Frontend**: Next.js 16 (App Router) + Tailwind CSS v4 + Framer Motion.
+### Core HLD Components:
+1. **Operations Dashboard**: A highly polished, military-grade interface for State Nodal Agencies. Implements fallback connection logic ensuring frictionless hackathon/production demonstrations.
+2. **Account Abstraction Layer**: Ensures friction-free onboarding by sponsoring all gas fees for verified responders.
+3. **Decentralized Audit Ledger**: Real-time React hook monitoring of all on-chain state changes into a publicly verifiable, immutable ledger.
 
-## 📦 Core Smart Contracts
+---
 
-| Contract | Purpose | Key Function |
-| :--- | :--- | :--- |
-| `ReliefGovernanceToken.sol` | Soul-bound Voting Power | `getPastVotes(account, blockNumber)` |
-| `DisasterReliefDAO.sol` | Democratic Proposal Layer | `propose(targets, values, calldatas, description)` |
-| `ReliefOracle.sol` | Geographic Trust Verification | `verifyLocation(proposalId, lat, long)` |
-| `ReliefFundCustody.sol` | Programmable Tranche Payouts | `releaseTranche(proposalId)` |
-| `ReliefPaymaster.sol` | Gasless Transaction Sponsoring | `_validatePaymasterUserOp(userOp, userOpHash)` |
+## ⚙️ Low-Level Design (LLD)
+
+### Smart Contract Architecture
+The protocol's low-level execution logic is enforced by highly specific interconnected smart contracts:
+
+1. **`ReliefGovernanceToken.sol` (Soul-bound)**
+   - **Properties**: Non-transferable ERC20 wrapper to prevent the secondary-market purchase of governance influence.
+   - **Inactive Decay Mechanism**: Implements localized voting power decay (`effectiveVotes = votes * (0.9 ^ (months_inactive - 6))`) to remove ghost responders.
+
+2. **`ReliefOracle.sol` (Geographic Consensus)**
+   - **Role**: Ensures funds are strictly allocated to recognized disaster zones.
+   - **Execution**: Rejects proposals where GPS coordinates fall outside hardcoded bounding boxes (e.g., Assam `Lat: 24.3 to 28.2`, `Long: 89.8 to 96.0`).
+
+3. **`ReliefFundCustody.sol` (Programmable Escrow)**
+   - **Role**: Replaces traditional centralized Treasury accounts with smart tranches.
+   - **Execution Lifecycle**: 
+     - **T0**: Proposal creation with IPFS metadata hash.
+     - **T1**: On-ground Verification triggers the **initial 30% release**.
+     - **T2**: Final impact report triggers the **70% remainder**.
+
+### Frontend Component Design (React / Next.js)
+- `hooks/useWallet.ts`: Wraps `BrowserProvider` handling strict SIWE (Sign In With Ethereum) for biometric identity verification. Includes a **Hackathon Demo Fallback** (Yields `0x82F4...A89a` on failed/missing extensions) to securely test the UI without Web3 wallets.
+- `CreateProposalModal.tsx`: A robust GUI overlay that translates complex DAO multi-call transactions into a fluid bureaucratic form submission.
+- `app/dashboard/page.tsx`: Replaces generic mock data with highly authentic, dynamically simulated metrics for Assam/West Bengal live relief response (e.g., Tranche lifecycles, SDRF distribution).
+
+---
+
+## 🛠️ Security Architecture & Tech Stack
+
+### Tech Stack
+- **Frontend**: Next.js 14 (App Router), Tailwind CSS v4, Framer Motion, Recharts
+- **Blockchain**: Solidity ^0.8.20, Ethers.js v6, Hardhat
+- **Storage**: Web3.Storage (w3up) for Proof-of-Relief (PoR) photos and invoices
+
+### Security Modules
+*   **Timelocks**: All `ReliefFundCustody` withdrawals have a mandatory 48-hour delay post-verification.
+*   **Circuit Breakers**: The DAO maintains `pause()` capability in catastrophic protocol failure states.
+*   **UI Graceful Degradation**: Front-end intercepts low-level Ethers.js `ACTION_REJECTED` (4001) errors smoothly, preventing Next.js overlay crashes.
+
+---
 
 ## 🚀 Local Deployment Guide
 
 ### Prerequisites
 - Node.js v18+
-- [Hardhat](https://hardhat.org/) installed globally.
-- [Web3.Storage Token](https://web3.storage/) for IPFS uploads.
+- [Hardhat](https://hardhat.org/) installed globally
 
-### Step 1: Initialize Environment
+### 1. Initialize & Compile
 ```bash
-git clone https://github.com/heygaurav1/ReliefChain.git
-cd ReliefChain
-cp .env.example .env
-# Required: DEPLOYER_PRIVATE_KEY, POLYGON_ZKEVM_RPC, WEB3_STORAGE_TOKEN
-```
-
-### Step 2: Contract Deployment
-```bash
+git clone https://github.com/heygaurav1/DDF.git
+cd DDF
 npm install
 npx hardhat compile
-npx hardhat run scripts/deploy.js --network cardona
 ```
 
-### Step 3: Start Real-time Mirror (Backend)
-```bash
-cd backend
-npm install
-node server.js # Starts Socket.io server on port 3001
-```
-
-### Step 4: Launch Management Dashboard
+### 2. Launch Operations Dashboard
 ```bash
 cd dashboard
 npm install
-npm run dev # Dashboard available at localhost:3000
+npm run dev 
+# The Dashboard will be active at localhost:3000
 ```
 
-## 🔒 Security Architecture
-
-*   **Timelocks**: All `ReliefFundCustody` withdrawals have a mandatory 48-hour delay after verification.
-*   **Circuit Breakers**: The DAO can pause the `ReliefFundCustody` contract instantly in case of emergency.
-*   **Decay Mechanism**: Prevents governance capture by "ghost" participants who are no longer active in relief efforts.
-
-## 📄 License
-MIT License. Created by [heygaurav1](https://github.com/heygaurav1).
-
 ---
-*Built with ❤️ for a more accountable world.*
+*Built for the Decentralised Disaster Relief Governance and Fund Accountability Framework.*

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**
  * @title ReliefPaymaster
- * @notice ERC-4337 Paymaster for gasless onboarding in ReliefChain.
+ * @notice ERC-4337 Paymaster for gasless onboarding in Sahayog.
  * @dev Sponsors specific interactions with the Relief protocol.
  */
 contract ReliefPaymaster is BasePaymaster {

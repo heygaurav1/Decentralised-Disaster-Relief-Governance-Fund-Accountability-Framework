@@ -40,21 +40,21 @@ export default function StatsOverview() {
       {stats.map((stat, index) => (
         <motion.div
           key={stat.label}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
-          className="glass-card flex items-start justify-between"
+          className="gov-card flex items-start justify-between"
         >
           <div>
-            <p className="text-white/50 text-sm font-medium">{stat.label}</p>
-            <h3 className="text-2xl font-bold text-white mt-1">{stat.value}</h3>
-            <p className={`text-xs mt-2 font-medium ${
-              stat.change.startsWith("+") ? "text-secondary" : "text-white/40"
+            <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">{stat.label}</p>
+            <h3 className="text-2xl font-black text-slate-900 mt-1">{stat.value}</h3>
+            <p className={`text-xs mt-2 font-semibold ${
+              stat.change.startsWith("+") ? "text-emerald-600" : "text-slate-400"
             }`}>
               {stat.change}
             </p>
           </div>
-          <div className={`${stat.color} p-3 bg-white/5 rounded-xl border border-white/5`}>
+          <div className={`${stat.color} p-2.5 bg-slate-50 rounded-xl border border-slate-100`}>
             {stat.icon}
           </div>
         </motion.div>
